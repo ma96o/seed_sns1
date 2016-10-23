@@ -1,13 +1,10 @@
-<!-- <?php
+<?php
     // $dsn = 'mysql:dbname=seed_sns1;host=localhost';
     // $user = 'root';
     // $password = '';
     // $dbh = new PDO($dsn, $user, $password);
     // $dbh->query('SET NAMES utf8');
-
     // if (!empty($_POST)) {
-
-
     //   $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?, `picture_path` = ?, `created` = now()';
 
     //   $data[] = $_POST['nick_name'];
@@ -19,15 +16,35 @@
     //   $stmt->execute($data);
 
     // }
-
-
-
-
-
-
-
     // $dbh = null;
-?> -->
+    session_start();
+
+    if (!empty($_POST)) {
+      // エラー項目の確認
+      $nick_name = trim(mb_convert_kana($_POST['nick_name'], "s", 'UTF-8'));
+      $email = trim(mb_convert_kana($_POST['email'], "s", 'UTF-8'));
+      $password = trim(mb_convert_kana($_POST['password'], "s", 'UTF-8'));
+
+      if ($nick_name == '') {
+        $error['nick_name'] = 'blank';
+      }
+      if ($email == '') {
+        $error['email'] = 'blank';
+      }
+      if ($password == '') {
+        $error['password'] = 'blank';
+      } elseif (strlen($password) < 4) {
+        $error['password'] = 'length';
+      }
+
+      if (empty($error)) {
+        $_SESSION['join'] = $_POST;
+
+        header('Location: check.php');
+        exit();
+      }
+    }
+?>
 <!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -82,26 +99,49 @@
     <div class="row">
       <div class="col-md-6 col-md-offset-3 content-margin-top">
         <legend>会員登録</legend>
-        <form method="post" action="check.php" class="form-horizontal" role="form">
+        <form method="post" action="" class="form-horizontal" role="form">
           <!-- ニックネーム -->
           <div class="form-group">
             <label class="col-sm-4 control-label">ニックネーム</label>
             <div class="col-sm-8">
+            <?php if (isset($_POST['nick_name'])): ?>
+              <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun" value="<?php echo htmlspecialchars($_POST['nick_name'], ENT_QUOTES, 'UTF-8'); ?>">
+            <?php else: ?>
               <input type="text" name="nick_name" class="form-control" placeholder="例： Seed kun">
+            <?php endif; ?>
+            <?php if (isset($error['nick_name']) && $error['nick_name'] == 'blank'): ?>
+              <p class="error">*ニックネームを入力してください。</p>
+            <?php endif; ?>
             </div>
           </div>
           <!-- メールアドレス -->
           <div class="form-group">
             <label class="col-sm-4 control-label">メールアドレス</label>
             <div class="col-sm-8">
+            <?php if (isset($_POST['email'])): ?>
+              <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com" value="<?php echo htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8'); ?>">
+            <?php else: ?>
               <input type="email" name="email" class="form-control" placeholder="例： seed@nex.com">
+            <?php endif; ?>
+            <?php if (isset($error['email']) && $error['email'] == 'blank'): ?>
+              <p class="error">*メールアドレスを入力してください。</p>
+            <?php endif; ?>
             </div>
           </div>
           <!-- パスワード -->
           <div class="form-group">
             <label class="col-sm-4 control-label">パスワード</label>
             <div class="col-sm-8">
-              <input type="password" name="password" class="form-control" placeholder="">
+              <?php if (isset($_POST['password'])): ?>
+                <input type="password" name="password" class="form-control" placeholder="" value="<?php echo htmlspecialchars($_POST['password'], ENT_QUOTES, 'UTF-8'); ?>">
+              <?php else: ?>
+                <input type="password" name="password" class="form-control" placeholder="">
+              <?php endif; ?>
+              <?php if(isset($error['password']) && $error['password'] == 'blank'): ?>
+                <p class="error">*パスワードを入力してください。</p>
+              <?php elseif (isset($error['password']) && $error['password'] == 'length'): ?>
+                <p class="error">*パスワードは４文字以上で入力してください。</p>
+              <?php endif; ?>
             </div>
           </div>
           <!-- プロフィール写真 -->
