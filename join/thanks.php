@@ -1,25 +1,26 @@
 <?php
-    $dsn = 'mysql:dbname=seed_sns1;host=localhost';
-    $user = 'root';
-    $password = '';
-    $dbh = new PDO($dsn, $user, $password);
-    $dbh->query('SET NAMES utf8');
+    // $dsn = 'mysql:dbname=seed_sns1;host=localhost';
+    // $user = 'root';
+    // $password = 'mysql';
+    // $dbh = new PDO($dsn, $user, $password);
+    // $dbh->query('SET NAMES utf8');
 
-    if (!empty($_POST)) {
-      $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?,
-      -- `picture_path` = ?,
-      `created` = now()';
+// ⇩check.phpでINSERTしてるからよくね？
+    // if (!empty($_POST)) {
+    //   $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?,
+    //   -- `picture_path` = ?,
+    //   `created` = now()';
 
-      $data[] = $_POST['nick_name'];
-      $data[] = $_POST['email'];
-      $data[] = $_POST['password'];
-      // $data[] = $_POST['picture_path'];
+    //   $data[] = $_POST['nick_name'];
+    //   $data[] = $_POST['email'];
+    //   $data[] = $_POST['password'];
+    //   // $data[] = $_POST['picture_path'];
 
-      $stmt = $dbh->prepare($sql);
-      $stmt->execute($data);
-    }
+    //   $stmt = $dbh->prepare($sql);
+    //   $stmt->execute($data);
+    // }
 
-    $dbh = null;
+    // $dbh = null;
 ?>
 <!DOCTYPE html>
 <html lang="ja">

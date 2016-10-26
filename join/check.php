@@ -1,16 +1,41 @@
 <?php 
+    session_start();
 
     $dsn = 'mysql:dbname=seed_sns1;host=localhost';
     $user = 'root';
-    $password = '';
+    $password = 'mysql';
     $dbh = new PDO($dsn, $user, $password);
     $dbh->query('SET NAMES utf8');
 
-    $nick_name = htmlspecialchars($_POST['nick_name']);
-    $email = htmlspecialchars($_POST['email']);
-    $password = htmlspecialchars($_POST['password']);
-    $picture_path = htmlspecialchars($_POST['picture_path']);
+    if (!empty($_POST)) {
+      $sql = 'INSERT INTO `members` SET `nick_name` =?, `email` =?, `password` =?, `picture_path` = "", `created` = now()';
 
+      $data[] = $_SESSION['join']['nick_name'];
+      $data[] = $_SESSION['join']['email'];
+      $data[] = $_SESSION['join']['password'];
+      // $data[] = $_SESSION['join']['picture_path'];
+
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      // echo "<br>";
+      // echo "<br>";
+      // echo "<br>";
+
+      // var_dump($data);
+      // echo "<br>";
+      // var_dump($_SESSION);
+
+      header('Location: thanks.php');
+      exit;
+
+    }
+
+
+    // $nick_name = htmlspecialchars($_POST['nick_name']);
+    // $email = htmlspecialchars($_POST['email']);
+    // $password = htmlspecialchars($_POST['password']);
+    // $picture_path = htmlspecialchars($_POST['picture_path']);
     // if (!empty($_POST)) {
 
 
@@ -25,9 +50,6 @@
     //   $stmt->execute($data);
 
     // }
-
-
-
 
 
 
@@ -87,7 +109,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4 col-md-offset-4 content-margin-top">
-        <form method="post" action="thanks.php" class="form-horizontal" role="form">
+        <form method="post" action="" class="form-horizontal" role="form">
           <input type="hidden" name="action" value="submit">
           <div class="well">ご登録内容をご確認ください。</div>
             <table class="table table-striped table-condensed">
@@ -96,19 +118,28 @@
                 <tr>
                   <td><div class="text-center">ニックネーム</div></td>
                   <td><div class="text-center">
-                    <?php echo $nick_name; ?>
+                    <?php echo htmlspecialchars($_SESSION['join']['nick_name'], ENT_QUOTES, 'UTF-8'); ?>
                   </div></td>
                 </tr>
                 <tr>
                   <td><div class="text-center">メールアドレス</div></td>
                   <td><div class="text-center">
-                  <?php echo $email; ?>
+                    <?php echo htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES, 'UTF-8'); ?>
                   </div></td>
                 </tr>
                 <tr>
                   <td><div class="text-center">パスワード</div></td>
                   <td><div class="text-center">
-                    <?php echo $password; ?>
+                  <?php
+                    $i = strlen($_SESSION['join']['password']);
+                    $pass = '●';
+                    while ($i > 1) {
+                      $pass .= '●';
+                      $i--;
+                    }
+
+                    echo $pass;
+                  ?>
                   </div></td>
                 </tr>
                 <tr>
