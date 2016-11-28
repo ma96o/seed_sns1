@@ -1,26 +1,29 @@
 <?php
-    // $dsn = 'mysql:dbname=seed_sns1;host=localhost';
-    // $user = 'root';
-    // $password = 'mysql';
-    // $dbh = new PDO($dsn, $user, $password);
-    // $dbh->query('SET NAMES utf8');
+    session_start();
+    require('join/dbconnect.php');
 
-// ⇩check.phpでINSERTしてるからよくね？
-    // if (!empty($_POST)) {
-    //   $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?,
-    //   -- `picture_path` = ?,
-    //   `created` = now()';
+    if(empty($_REQUEST['tweet_id'])){
+      header('location: index.php');
+      exit();
+    }
 
-    //   $data[] = $_POST['nick_name'];
-    //   $data[] = $_POST['email'];
-    //   $data[] = $_POST['password'];
-    //   // $data[] = $_POST['picture_path'];
+    $sql = sprintf('SELECT * FROM `tweets` WHERE `tweet_id`=%d',
+      mysqli_real_escape_string($db, $_REQUEST['tweet_id']));
+    $rec = mysqli_query($db, $sql) or die(mysqli_error());
 
-    //   $stmt = $dbh->prepare($sql);
-    //   $stmt->execute($data);
-    // }
 
-    // $dbh = null;
+    if(!empty($_POST)){
+      $sql = sprintf('UPDATE `tweets` SET `tweet`="%s" WHERE `tweet_id`=%d',
+        mysqli_real_escape_string($db, $_POST['tweet']),
+        mysqli_real_escape_string($db, $_REQUEST['tweet_id'])
+        );
+      mysqli_query($db, $sql) or die(mysqli_error($db));
+
+      header('location: index.php');
+      exit();
+    }
+
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -32,14 +35,11 @@
     <title>SeedSNS</title>
 
     <!-- Bootstrap -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="../assets/css/form.css" rel="stylesheet">
-    <link href="../assets/css/timeline.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
-    <!--
-      designフォルダ内では2つパスの位置を戻ってからcssにアクセスしていることに注意！
-     -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/form.css" rel="stylesheet">
+    <link href="assets/css/timeline.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -65,6 +65,7 @@
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <ul class="nav navbar-nav navbar-right">
+                <li><a href="logout.php">ログアウト</a></li>
               </ul>
           </div>
           <!-- /.navbar-collapse -->
@@ -74,12 +75,25 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-md-4 col-md-offset-4 content-margin-top">
-        <div class="well">
-          ご登録ありがとうございます。 <br>
-          下記ボタンよりログインして下さい。
-        </div>
-        <a href="../login.php" class="btn btn-default">ログイン</a>
+      <div class="col-md-4 content-margin-top">
+      <?php if($tweet = mysqli_fetch_assoc($rec)): ?>
+        <form method="post" action="" class="form-horizontal" role="form">
+            <!-- つぶやき -->
+            <div class="form-group">
+              <label class="col-sm-4 control-label">つぶやき</label>
+              <div class="col-sm-8">
+                <textarea name="tweet" cols="50" rows="5" class="form-control" placeholder="例：Hello World!"><?php echo $tweet['tweet']; ?></textarea>
+                <input type="hidden" name="reply_tweet_id" value="<?php echo $_REQUEST['res']; ?>">
+              </div>
+            </div>
+          <ul class="paging">
+            <input type="submit" class="btn btn-info" value="編集する">
+          </ul>
+        </form>
+      <?php else: ?>
+        <p>そのつぶやきは削除されたか、URLが間違っています</p>
+      <?php endif; ?>
+
       </div>
     </div>
   </div>
@@ -89,4 +103,3 @@
     <script src="js/bootstrap.min.js"></script>
   </body>
 </html>
-

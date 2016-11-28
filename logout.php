@@ -1,26 +1,19 @@
-<?php
-    // $dsn = 'mysql:dbname=seed_sns1;host=localhost';
-    // $user = 'root';
-    // $password = 'mysql';
-    // $dbh = new PDO($dsn, $user, $password);
-    // $dbh->query('SET NAMES utf8');
+<?php 
+    session_start();
+    require('join/dbconnect.php');
 
-// ⇩check.phpでINSERTしてるからよくね？
-    // if (!empty($_POST)) {
-    //   $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?,
-    //   -- `picture_path` = ?,
-    //   `created` = now()';
 
-    //   $data[] = $_POST['nick_name'];
-    //   $data[] = $_POST['email'];
-    //   $data[] = $_POST['password'];
-    //   // $data[] = $_POST['picture_path'];
+    $_SESSION = array();
+    if (ini_get('session.use_cookies')){
+      $params = session_get_cookie_params();
+      setcookie(session_name(), '', time() - 42000,
+        $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
 
-    //   $stmt = $dbh->prepare($sql);
-    //   $stmt->execute($data);
-    // }
+    session_destroy();
 
-    // $dbh = null;
+    setcookie('email', '', time() - 3600);
+    setcookie('password', '', time() - 3600);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -32,14 +25,11 @@
     <title>SeedSNS</title>
 
     <!-- Bootstrap -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="../assets/css/form.css" rel="stylesheet">
-    <link href="../assets/css/timeline.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
-    <!--
-      designフォルダ内では2つパスの位置を戻ってからcssにアクセスしていることに注意！
-     -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/form.css" rel="stylesheet">
+    <link href="assets/css/timeline.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -74,12 +64,10 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-md-4 col-md-offset-4 content-margin-top">
-        <div class="well">
-          ご登録ありがとうございます。 <br>
-          下記ボタンよりログインして下さい。
-        </div>
-        <a href="../login.php" class="btn btn-default">ログイン</a>
+      <div class="col-md-6 col-md-offset-3 content-margin-top">
+      <p>ログアウトしました。</p>
+      </div>        </div>
+        <a href="login.php" class="btn btn-default">ログイン画面へ</a>
       </div>
     </div>
   </div>
@@ -89,4 +77,3 @@
     <script src="js/bootstrap.min.js"></script>
   </body>
 </html>
-

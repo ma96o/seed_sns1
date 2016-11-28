@@ -19,6 +19,9 @@
     // $dbh = null;
     session_start();
 
+    require('dbconnect.php');
+
+
     if (!empty($_POST)) {
       // エラー項目の確認
       $nick_name = trim(mb_convert_kana($_POST['nick_name'], "s", 'UTF-8'));
@@ -37,12 +40,43 @@
         $error['password'] = 'length';
       }
 
+
+      $fileName = $_FILES['picture_path']['name'];
+      if (!empty($fileName)) {
+        $ext = substr($fileName, -3);
+        if ($ext != 'jpg' && $ext != 'gif' && $ext != 'png') {
+          $error['picture_path'] = 'type';
+        }
+      } elseif ($fileName == "") {
+        $error['picture_path'] = 'blank';
+      }
+
       if (empty($error)) {
-        $_SESSION['join'] = $_POST;
+        $sql = sprintf('SELECT COUNT(*) AS cnt FROM `members` WHERE `email`="%s"',
+          mysqli_real_escape_string($db, $_POST['email']));
+        $rec = mysqli_query($db, $sql) or die(mysqli_error($db));
+
+        $table = mysqli_fetch_assoc($rec);
+        if ($table['cnt'] > 0){
+          $error['email'] = 'duplecate';
+        }
+      }
+
+
+      if (empty($error)) {
+        $picture_path = date('YmdHis') . $_FILES['picture_path']['name'];
+        move_uploaded_file($_FILES['picture_path']['tmp_name'], '../member_picture/'.$picture_path);
+
+        $_SESSION['join1'] = $_POST;
+        $_SESSION['join1']['picture_path'] = $picture_path;
 
         header('Location: check.php');
         exit();
       }
+    }
+    if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'rewrite') {
+      $_POST = $_SESSION['join1'];
+      $error['rewrite'] = true;
     }
 ?>
 <!DOCTYPE html>
@@ -99,7 +133,7 @@
     <div class="row">
       <div class="col-md-6 col-md-offset-3 content-margin-top">
         <legend>会員登録</legend>
-        <form method="post" action="" class="form-horizontal" role="form">
+        <form method="post" action="" class="form-horizontal" role="form" enctype="multipart/form-data">
           <!-- ニックネーム -->
           <div class="form-group">
             <label class="col-sm-4 control-label">ニックネーム</label>
@@ -126,6 +160,9 @@
             <?php if (isset($error['email']) && $error['email'] == 'blank'): ?>
               <p class="error">*メールアドレスを入力してください。</p>
             <?php endif; ?>
+            <?php if (isset($error['email']) && $error['email'] == 'duplecate'): ?>
+              <p class="error">*このメールアドレスはすでに登録されています。</p>
+            <?php endif; ?>
             </div>
           </div>
           <!-- パスワード -->
@@ -149,6 +186,15 @@
             <label class="col-sm-4 control-label">プロフィール写真</label>
             <div class="col-sm-8">
               <input type="file" name="picture_path" class="form-control">
+
+              <?php if (isset($error['picture_path']) && $error['picture_path'] == 'type'): ?>
+                <p class="error">*プロフィール写真は「jpg」「png」「gif」で指定してください。</p>
+              <?php elseif (isset($error['picture_path']) && $error['picture_path'] == 'blank'): ?>
+                <p class="error">＊プロフィール写真を指定してください。</p>
+              <?php endif; ?>
+              <?php if (isset($error['rewrite']) && $error['rewrite'] == true): ?>
+                <p class="error">*プロフィール写真を再選択してください。</p>
+              <?php endif; ?>
             </div>
           </div>
 

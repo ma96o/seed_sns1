@@ -1,26 +1,11 @@
 <?php
-    // $dsn = 'mysql:dbname=seed_sns1;host=localhost';
-    // $user = 'root';
-    // $password = 'mysql';
-    // $dbh = new PDO($dsn, $user, $password);
-    // $dbh->query('SET NAMES utf8');
+    session_start();
 
-// ⇩check.phpでINSERTしてるからよくね？
-    // if (!empty($_POST)) {
-    //   $sql = 'INSERT INTO `members` SET `nick_name` = ?, `email` = ?, `password` = ?,
-    //   -- `picture_path` = ?,
-    //   `created` = now()';
+    require('function.php');
+    require('join/dbconnect.php');
 
-    //   $data[] = $_POST['nick_name'];
-    //   $data[] = $_POST['email'];
-    //   $data[] = $_POST['password'];
-    //   // $data[] = $_POST['picture_path'];
-
-    //   $stmt = $dbh->prepare($sql);
-    //   $stmt->execute($data);
-    // }
-
-    // $dbh = null;
+    $members = show_members();
+    $followMemberId = followMemberId($_SESSION['id']);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -32,14 +17,11 @@
     <title>SeedSNS</title>
 
     <!-- Bootstrap -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="../assets/css/form.css" rel="stylesheet">
-    <link href="../assets/css/timeline.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
-    <!--
-      designフォルダ内では2つパスの位置を戻ってからcssにアクセスしていることに注意！
-     -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/form.css" rel="stylesheet">
+    <link href="assets/css/timeline.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -65,6 +47,7 @@
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
               <ul class="nav navbar-nav navbar-right">
+                <li><a href="logout.php">ログアウト</a></li>
               </ul>
           </div>
           <!-- /.navbar-collapse -->
@@ -72,21 +55,42 @@
       <!-- /.container-fluid -->
   </nav>
 
+
   <div class="container">
     <div class="row">
       <div class="col-md-4 col-md-offset-4 content-margin-top">
-        <div class="well">
-          ご登録ありがとうございます。 <br>
-          下記ボタンよりログインして下さい。
-        </div>
-        <a href="../login.php" class="btn btn-default">ログイン</a>
+     <!-- <div class="col-md-8 content-margin-top"> -->
+       <h1>list of members</h1>
+
+
+        <?php  if(count($members)): ?>
+          <?php foreach($members as $k => $v): ?>
+            <?php if($k != $_SESSION['id']): ?>
+          <div class="msg">
+            <img src="member_picture/<?php echo memberPicture($k); ?>" width="48" height="48">
+            <p>
+              <span class="name"> <?php echo $v; ?> </span>
+              <?php if(in_array($k, $followMemberId)): ?>
+                <a href="action.php?member_id=<?php echo $k; ?>&do=unfollow" class="btn btn-xs btn-default">フォローを外す</a>
+              <?php else: ?>
+                <a href="action.php?member_id=<?php echo $k; ?>&do=follow" class="btn btn-xs btn-primary">フォロー</a>
+              <?php endif; ?>
+            </p>
+
+          </div>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <p>there is no members in the system!</p>
+        <?php endif; ?>
+
       </div>
     </div>
   </div>
+
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
   </body>
 </html>
-

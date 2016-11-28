@@ -1,35 +1,55 @@
 <?php 
+
     session_start();
 
-    $dsn = 'mysql:dbname=seed_sns1;host=localhost';
-    $user = 'root';
-    $password = 'mysql';
-    $dbh = new PDO($dsn, $user, $password);
-    $dbh->query('SET NAMES utf8');
-
-    if (!empty($_POST)) {
-      $sql = 'INSERT INTO `members` SET `nick_name` =?, `email` =?, `password` =?, `picture_path` = "", `created` = now()';
-
-      $data[] = $_SESSION['join']['nick_name'];
-      $data[] = $_SESSION['join']['email'];
-      $data[] = $_SESSION['join']['password'];
-      // $data[] = $_SESSION['join']['picture_path'];
-
-      $stmt = $dbh->prepare($sql);
-      $stmt->execute($data);
-
-      // echo "<br>";
-      // echo "<br>";
-      // echo "<br>";
-
-      // var_dump($data);
-      // echo "<br>";
-      // var_dump($_SESSION);
-
-      header('Location: thanks.php');
-      exit;
-
+    if (!isset($_SESSION['join1'])) {
+      header('location: index.php');
+      exit();
     }
+
+
+
+    require('dbconnect.php');
+
+    if(!empty($_POST)) {
+
+      $sql = sprintf('INSERT INTO `members` SET `nick_name`="%s", `email`="%s", `password`="%s", `picture_path`="%s", `created`=now()',
+        mysqli_real_escape_string($db, $_SESSION['join1']['nick_name']),
+        mysqli_real_escape_string($db, $_SESSION['join1']['email']),
+        mysqli_real_escape_string($db, sha1($_SESSION['join1']['password'])),
+        mysqli_real_escape_string($db, $_SESSION['join1']['picture_path']));
+      mysqli_query($db, $sql) or die(mysqli_error($db));
+      unset($_SESSION['join1']);
+
+      header('location: thanks.php');
+      exit();
+    }
+
+
+
+    // if (!empty($_POST)) {
+    //   $sql = 'INSERT INTO `members` SET `nick_name` =?, `email` =?, `password` =?, `picture_path` = "", `created` = now()';
+
+    //   $data[] = $_SESSION['join1']['nick_name'];
+    //   $data[] = $_SESSION['join1']['email'];
+    //   $data[] = $_SESSION['join1']['password'];
+    //   // $data[] = $_SESSION['join1']['picture_path'];
+
+    //   $stmt = $dbh->prepare($sql);
+    //   $stmt->execute($data);
+
+    //   // echo "<br>";
+    //   // echo "<br>";
+    //   // echo "<br>";
+
+    //   // var_dump($data);
+    //   // echo "<br>";
+    //   // var_dump($_SESSION);
+
+    //   header('Location: thanks.php');
+    //   exit;
+
+    // }
 
 
     // $nick_name = htmlspecialchars($_POST['nick_name']);
@@ -118,20 +138,20 @@
                 <tr>
                   <td><div class="text-center">ニックネーム</div></td>
                   <td><div class="text-center">
-                    <?php echo htmlspecialchars($_SESSION['join']['nick_name'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php echo htmlspecialchars($_SESSION['join1']['nick_name'], ENT_QUOTES, 'UTF-8'); ?>
                   </div></td>
                 </tr>
                 <tr>
                   <td><div class="text-center">メールアドレス</div></td>
                   <td><div class="text-center">
-                    <?php echo htmlspecialchars($_SESSION['join']['email'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php echo htmlspecialchars($_SESSION['join1']['email'], ENT_QUOTES, 'UTF-8'); ?>
                   </div></td>
                 </tr>
                 <tr>
                   <td><div class="text-center">パスワード</div></td>
                   <td><div class="text-center">
                   <?php
-                    $i = strlen($_SESSION['join']['password']);
+                    $i = strlen($_SESSION['join1']['password']);
                     $pass = '●';
                     while ($i > 1) {
                       $pass .= '●';
@@ -144,12 +164,12 @@
                 </tr>
                 <tr>
                   <td><div class="text-center">プロフィール画像</div></td>
-                  <td><div class="text-center"><img src="http://c85c7a.medialib.glogster.com/taniaarca/media/71/71c8671f98761a43f6f50a282e20f0b82bdb1f8c/blog-images-1349202732-fondo-steve-jobs-ipad.jpg" width="100" height="100"></div></td>
+                  <td><div class="text-center"><img src="../member_picture/<?php echo $_SESSION['join1']['picture_path'];?>" width="100" height="100"></div></td>
                 </tr>
               </tbody>
             </table>
 
-            <a href="index.php">&laquo;&nbsp;書き直す</a> | 
+            <a href="index.php?action=rewrite">&laquo;&nbsp;書き直す</a> | 
             <input type="submit" class="btn btn-default" value="会員登録">
           </div>
         </form>
